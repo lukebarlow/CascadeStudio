@@ -61,7 +61,17 @@ Model code is saved to the URL upon every successful evaluation, so you can copy
 
 ## Contributing
 
-Cascade Studio is entirely static assets and vanilla javascript, so running it locally is as simple as running a server from the root directory (such as the [VS Code Live Server](https://github.com/ritwickdey/vscode-live-server), [Python live-server](https://pypi.org/project/live-server/), or [Node live-server](https://www.npmjs.com/package/live-server) ).
+Cascade Studio uses [Bun](https://bun.sh) for bundling dependencies and serving during development. To run locally:
+
+```bash
+# Install dependencies
+bun install  # or npm install
+
+# Build and serve
+bun run dev
+```
+
+The application will be available at http://localhost:3000. See [BUILDING.md](BUILDING.md) for more details.
 
 Pull Requests to this repo are automatically hosted to Vercel instances, so other users will be able to test and benefit from your modifications as soon as the PR is submitted.
 
