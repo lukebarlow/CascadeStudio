@@ -26,7 +26,7 @@
 
             // Begins loading the CAD Kernel Web Worker
             if (window.Worker) {
-                var cascadeStudioWorker = new Worker('./js/CADWorker/CascadeStudioMainWorker.js', { type: 'module' });
+                var cascadeStudioWorker = new Worker('./js/CADWorker/CascadeStudioMainWorker.js');
                 // Ping Pong Messages Back and Forth based on their registration in messageHandlers
                 var messageHandlers = {};
                 cascadeStudioWorker.onmessage = function (e) {
@@ -42,8 +42,43 @@
         <link rel="manifest"           href="./manifest.webmanifest">
         <link rel="apple-touch-icon"   href="./icon/apple-touch-icon.png">
 
-        <!-- Load Three.js and controls as ESM module -->
-        <script type="module" src="./js/main.js"></script>
+        <!-- Load Three.js as ESM module and make it global -->
+        <script type="module">
+            import * as THREE from './node_modules/three/build/three.module.js';
+            // Make THREE globally available
+            window.THREE = THREE;
+            console.log('THREE module loaded');
+            
+            // Load Three.js control scripts
+            const scripts = [
+                './node_modules/three/examples/js/controls/DragControls.js',
+                './node_modules/three/examples/js/controls/OrbitControls.js',
+                './node_modules/three/examples/js/controls/TransformControls.js',
+                './node_modules/three/examples/js/exporters/STLExporter.js',
+                './node_modules/three/examples/js/exporters/OBJExporter.js'
+            ];
+            
+            // Load scripts sequentially
+            async function loadScripts() {
+                for (const src of scripts) {
+                    await new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = src;
+                        script.onload = () => {
+                            console.log(`Loaded ${src}`);
+                            resolve();
+                        };
+                        script.onerror = reject;
+                        document.head.appendChild(script);
+                    });
+                }
+                console.log('All THREE controls loaded, checking:', window.THREE.OrbitControls);
+                // Signal that THREE and controls are loaded
+                window.dispatchEvent(new Event('three-ready'));
+            }
+            
+            loadScripts();
+        </script>
 
         <script type="text/javascript" src="./node_modules/tweakpane/dist/tweakpane.min.js"></script>
 
@@ -55,11 +90,40 @@
 
         <script type="text/javascript" src="./node_modules/rawflate/rawdeflate.js"></script>
         <script type="text/javascript" src="./node_modules/rawflate/rawinflate.js"></script>
-        <script type="module" src="./js/MainPage/CascadeViewHandles.js"></script>
-        <script type="module" src="./js/MainPage/CascadeView.js"></script>
+        
+        <!-- Load application modules after THREE is ready -->
+        <script type="module">
+            console.log('Waiting for three-ready event...');
+            await new Promise(resolve => {
+                if (window.THREE && window.THREE.OrbitControls) {
+                    console.log('THREE.OrbitControls already available');
+                    resolve();
+                } else {
+                    console.log('Waiting for three-ready event...');
+                    window.addEventListener('three-ready', () => {
+                        console.log('three-ready event received');
+                        resolve();
+                    }, { once: true });
+                }
+            });
+            console.log('THREE ready, loading application modules...');
+            // Import CascadeView first (defines CascadeEnvironment)
+            await import('./js/MainPage/CascadeViewHandles.js');
+            await import('./js/MainPage/CascadeView.js');
+            // Then import CascadeMain (uses CascadeEnvironment)
+            await import('./js/MainPage/CascadeMain.js');
+            
+            console.log('All modules loaded, calling initialize()...');
+            // Call initialize() after everything is loaded
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => window.initialize());
+            } else {
+                window.initialize();
+            }
+        </script>
     </head>
 
-    <body onload="initialize();" style="margin:0px; background-color:rgb(34, 34, 34); "><!--overflow:hidden; position:fixed;-->
+    <body style="margin:0px; background-color:rgb(34, 34, 34); "><!--overflow:hidden; position:fixed;-->
         <h1 hidden></h1> <!-- Puts the Lighthouse Score over 90 heheh-->
         <div id="topnav" class="topnav">
             <a href="https://github.com/zalo/CascadeStudio">Cascade Studio 0.0.7</a>
@@ -79,7 +143,7 @@
             <script type="text/javascript" src="./node_modules/monaco-editor/min/vs/loader.js"></script>
             <script type="text/javascript" src="./node_modules/monaco-editor/min/vs/editor/editor.main.nls.js"></script>
             <script type="text/javascript" src="./node_modules/monaco-editor/min/vs/editor/editor.main.js"></script>
-            <script type="module" src="./js/MainPage/CascadeMain.js"></script>
+            <!-- CascadeMain.js is now loaded as a module in the head -->
         </div>
 
     </body>

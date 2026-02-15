@@ -1,5 +1,6 @@
 // This file handles Transformation Gizmos
-import * as THREE from '../../node_modules/three/build/three.module.js';
+
+// THREE is loaded globally from index.html
 
 /** Adds Handle Gizmo Functionality to the Cascade View */
 export function initializeHandleGizmos(threejsViewport){
