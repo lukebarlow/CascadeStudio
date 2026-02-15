@@ -65,9 +65,9 @@ if (existsSync(monacoSrc)) {
   cpSync(monacoSrc, monacoDest, { recursive: true });
 }
 
-// Copy OpenCascade.js WASM files
-const ocSrc = "./node_modules/opencascade.js/dist";
-const ocDest = "./dist/node_modules/opencascade.js/dist";
+// Copy OpenCascade.js WASM files (custom build from vendor)
+const ocSrc = "./vendor/opencascade.js/dist";
+const ocDest = "./dist/vendor/opencascade.js/dist";
 if (existsSync(ocSrc)) {
   cpSync(ocSrc, ocDest, { recursive: true });
 }
@@ -79,11 +79,11 @@ if (existsSync(glCssSrc)) {
   cpSync(glCssSrc, glCssDest, { recursive: true });
 }
 
-// Copy vendored libraries (rawflate, opentype.js, potpack)
+// Copy vendored libraries (rawflate, opentype.js, potpack) - these are custom/vendored
 const vendoredLibs = ["rawflate", "opentype.js", "potpack"];
 for (const lib of vendoredLibs) {
-  const libSrc = `./node_modules/${lib}`;
-  const libDest = `./dist/node_modules/${lib}`;
+  const libSrc = `./vendor/${lib}`;
+  const libDest = `./dist/vendor/${lib}`;
   if (existsSync(libSrc)) {
     cpSync(libSrc, libDest, { recursive: true });
   }
