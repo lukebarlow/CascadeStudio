@@ -42,43 +42,13 @@
         <link rel="manifest"           href="./manifest.webmanifest">
         <link rel="apple-touch-icon"   href="./icon/apple-touch-icon.png">
 
-        <!-- Load Three.js as ESM module and make it global -->
-        <script type="module">
-            import * as THREE from './node_modules/three/build/three.module.js';
-            // Make THREE globally available
-            window.THREE = THREE;
-            console.log('THREE module loaded');
-            
-            // Load Three.js control scripts
-            const scripts = [
-                './node_modules/three/examples/js/controls/DragControls.js',
-                './node_modules/three/examples/js/controls/OrbitControls.js',
-                './node_modules/three/examples/js/controls/TransformControls.js',
-                './node_modules/three/examples/js/exporters/STLExporter.js',
-                './node_modules/three/examples/js/exporters/OBJExporter.js'
-            ];
-            
-            // Load scripts sequentially
-            async function loadScripts() {
-                for (const src of scripts) {
-                    await new Promise((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = src;
-                        script.onload = () => {
-                            console.log(`Loaded ${src}`);
-                            resolve();
-                        };
-                        script.onerror = reject;
-                        document.head.appendChild(script);
-                    });
-                }
-                console.log('All THREE controls loaded, checking:', window.THREE.OrbitControls);
-                // Signal that THREE and controls are loaded
-                window.dispatchEvent(new Event('three-ready'));
-            }
-            
-            loadScripts();
-        </script>
+        <!-- Load Three.js and controls as regular scripts -->
+        <script type="text/javascript" src="./node_modules/three/build/three.min.js"></script>
+        <script type="text/javascript" src="./node_modules/three/examples/js/controls/DragControls.js"></script>
+        <script type="text/javascript" src="./node_modules/three/examples/js/controls/OrbitControls.js"></script>
+        <script type="text/javascript" src="./node_modules/three/examples/js/controls/TransformControls.js"></script>
+        <script type="text/javascript" src="./node_modules/three/examples/js/exporters/STLExporter.js"></script>
+        <script type="text/javascript" src="./node_modules/three/examples/js/exporters/OBJExporter.js"></script>
 
         <script type="text/javascript" src="./node_modules/tweakpane/dist/tweakpane.min.js"></script>
 
@@ -91,29 +61,13 @@
         <script type="text/javascript" src="./node_modules/rawflate/rawdeflate.js"></script>
         <script type="text/javascript" src="./node_modules/rawflate/rawinflate.js"></script>
         
-        <!-- Load application modules after THREE is ready -->
+        <!-- Load application modules -->
         <script type="module">
-            console.log('Waiting for three-ready event...');
-            await new Promise(resolve => {
-                if (window.THREE && window.THREE.OrbitControls) {
-                    console.log('THREE.OrbitControls already available');
-                    resolve();
-                } else {
-                    console.log('Waiting for three-ready event...');
-                    window.addEventListener('three-ready', () => {
-                        console.log('three-ready event received');
-                        resolve();
-                    }, { once: true });
-                }
-            });
-            console.log('THREE ready, loading application modules...');
-            // Import CascadeView first (defines CascadeEnvironment)
+            // Import application modules as ESM
             await import('./js/MainPage/CascadeViewHandles.js');
             await import('./js/MainPage/CascadeView.js');
-            // Then import CascadeMain (uses CascadeEnvironment)
             await import('./js/MainPage/CascadeMain.js');
             
-            console.log('All modules loaded, calling initialize()...');
             // Call initialize() after everything is loaded
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', () => window.initialize());
