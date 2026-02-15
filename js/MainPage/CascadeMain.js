@@ -2,12 +2,15 @@
 // If you're looking for the internals of the CAD System, they're in /js/CADWorker
 // If you're looking for the 3D Three.js Viewport, they're in /js/MainPage/CascadeView*
 
+// THREE is loaded globally from index.html
+
 var myLayout, monacoEditor, threejsViewport,
     consoleContainer, consoleGolden, codeContainer, gui,
     GUIState, guiSeparatorAdded = false, userGui = false, count = 0, //focused = true,
     messageHandlers = {},
     startup, file = {}, realConsoleLog;
 window.workerWorking = false;
+window.messageHandlers = messageHandlers; // Expose for other modules
 
 let starterCode = 
 `// Welcome to Cascade Studio!   Here are some useful functions:
@@ -31,10 +34,10 @@ Translate([-25, 0, 40], Text3D("Hi!", 36, 0.15, 'Consolas'));
 // Don't forget to push imported or oc-defined shapes into sceneShapes to add them to the workspace!`;
 
 function initialize(projectContent = null) {
-    this.searchParams = new URLSearchParams(window.location.search || window.location.hash.substr(1))
+    const searchParams = new URLSearchParams(window.location.search || window.location.hash.slice(1))
 
     // Load the initial Project from - "projectContent", or the URL
-    let loadFromURL     = this.searchParams.has("code")
+    let loadFromURL     = searchParams.has("code")
     // Set up the Windowing/Docking/Layout System  ---------------------------------------
 
     // Load a project from the Gallery
@@ -51,8 +54,8 @@ function initialize(projectContent = null) {
         let codeStr = starterCode;
         GUIState = {};
         if (loadFromURL) {
-            codeStr  = decode(this.searchParams.get("code"));
-            GUIState = JSON.parse(decode(this.searchParams.get("gui")));
+            codeStr  = decode(searchParams.get("code"));
+            GUIState = JSON.parse(decode(searchParams.get("gui")));
         }
 
         // Define the Default Golden Layout
@@ -158,6 +161,7 @@ function initialize(projectContent = null) {
                 minimap: { enabled: false }//,
                 //model: null
             });
+            window.monacoEditor = monacoEditor; // Expose globally for other modules
 
             // Collapse all Functions in the Editor to suppress library clutter -----------------
             let codeLines = state.code.split(/\r\n|\r|\n/);
@@ -313,6 +317,7 @@ function initialize(projectContent = null) {
             floatingGUIContainer.id = "guiPanel";
             container.getElement().get(0).appendChild(floatingGUIContainer);
             threejsViewport = new CascadeEnvironment(container);
+            window.threejsViewport = threejsViewport; // Expose globally for HTML handlers
         });
     });
 
@@ -646,3 +651,13 @@ function isArrayLike(item) {
         )
     );
 }
+
+// Export functions to window for HTML inline handlers
+window.initialize = initialize;
+window.saveProject = saveProject;
+window.loadProject = loadProject;
+window.loadFiles = loadFiles;
+window.clearExternalFiles = clearExternalFiles;
+
+// Export for ESM imports
+export { initialize, saveProject, loadProject, loadFiles, clearExternalFiles };

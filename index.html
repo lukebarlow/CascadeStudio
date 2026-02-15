@@ -42,6 +42,7 @@
         <link rel="manifest"           href="./manifest.webmanifest">
         <link rel="apple-touch-icon"   href="./icon/apple-touch-icon.png">
 
+        <!-- Load Three.js and controls as regular scripts -->
         <script type="text/javascript" src="./node_modules/three/build/three.min.js"></script>
         <script type="text/javascript" src="./node_modules/three/examples/js/controls/DragControls.js"></script>
         <script type="text/javascript" src="./node_modules/three/examples/js/controls/OrbitControls.js"></script>
@@ -59,11 +60,24 @@
 
         <script type="text/javascript" src="./node_modules/rawflate/rawdeflate.js"></script>
         <script type="text/javascript" src="./node_modules/rawflate/rawinflate.js"></script>
-        <script type="text/javascript" src="./js/MainPage/CascadeViewHandles.js"></script>
-        <script type="text/javascript" src="./js/MainPage/CascadeView.js"></script>
+        
+        <!-- Load application modules -->
+        <script type="module">
+            // Import application modules as ESM
+            await import('./js/MainPage/CascadeViewHandles.js');
+            await import('./js/MainPage/CascadeView.js');
+            await import('./js/MainPage/CascadeMain.js');
+            
+            // Call initialize() after everything is loaded
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => window.initialize());
+            } else {
+                window.initialize();
+            }
+        </script>
     </head>
 
-    <body onload="initialize();" style="margin:0px; background-color:rgb(34, 34, 34); "><!--overflow:hidden; position:fixed;-->
+    <body style="margin:0px; background-color:rgb(34, 34, 34); "><!--overflow:hidden; position:fixed;-->
         <h1 hidden></h1> <!-- Puts the Lighthouse Score over 90 heheh-->
         <div id="topnav" class="topnav">
             <a href="https://github.com/zalo/CascadeStudio">Cascade Studio 0.0.7</a>
@@ -83,7 +97,7 @@
             <script type="text/javascript" src="./node_modules/monaco-editor/min/vs/loader.js"></script>
             <script type="text/javascript" src="./node_modules/monaco-editor/min/vs/editor/editor.main.nls.js"></script>
             <script type="text/javascript" src="./node_modules/monaco-editor/min/vs/editor/editor.main.js"></script>
-            <script type="text/javascript" src="./js/MainPage/CascadeMain.js"></script>
+            <!-- CascadeMain.js is now loaded as a module in the head -->
         </div>
 
     </body>

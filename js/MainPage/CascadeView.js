@@ -1,6 +1,10 @@
 // This file governs the 3D Viewport which displays the 3D Model
 // It is also in charge of saving to STL and OBJ
 
+import { initializeHandleGizmos } from './CascadeViewHandles.js';
+
+// THREE is loaded globally from index.html
+
 /** Create the base class for a 3D Viewport.
  *  This includes the floor, the grid, the fog, the camera, and lights */
 var Environment = function (goldenContainer) {
@@ -378,3 +382,7 @@ var CascadeEnvironment = function (goldenContainer) {
   // Initialize the view in-case we're lazy rendering...
   this.environment.renderer.render(this.environment.scene, this.environment.camera);
 }
+
+// Export to window for backward compatibility
+window.Environment = Environment;
+window.CascadeEnvironment = CascadeEnvironment;

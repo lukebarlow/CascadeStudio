@@ -1,7 +1,12 @@
 // This file handles Transformation Gizmos
 
+// THREE is loaded globally from index.html
+
 /** Adds Handle Gizmo Functionality to the Cascade View */
-function initializeHandleGizmos(threejsViewport){
+export function initializeHandleGizmos(threejsViewport){
+  // Access global messageHandlers and monacoEditor from window
+  const messageHandlers = window.messageHandlers || {};
+  const monacoEditor = window.monacoEditor;
   /** Create a Transformation Gizmo in the Scene View */
   messageHandlers["createTransformHandle"] = function (payload) {
     if (payload.lineAndColumn[0] <= 0) {
