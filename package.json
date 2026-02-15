@@ -14,8 +14,8 @@
 	"bundleDependencies": false,
 	"scripts": {
 		"build": "bun run build.ts",
-		"dev": "bun run --watch build.ts & bun --bun serve dist --port 3000",
-		"serve": "bun --bun serve dist --port 3000"
+		"dev": "bun run build.ts && bun run serve.ts",
+		"serve": "bun run serve.ts"
 	},
 	"dependencies": {
 		"tweakpane": "^3.0.5",

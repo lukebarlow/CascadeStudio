@@ -25,17 +25,19 @@ await Bun.build({
   },
 });
 
-// Bundle the CAD Worker
-await Bun.build({
-  entrypoints: ["./src/worker.ts"],
-  outdir: "./dist/js",
-  target: "browser",
-  minify: false,
-  sourcemap: "external",
-  naming: {
-    entry: "worker.js",
-  },
-});
+// Copy worker files directly (they use importScripts and can't be bundled as ES modules)
+const workerDir = "./js/CADWorker";
+const workerDest = "./dist/js/CADWorker";
+if (existsSync(workerDir)) {
+  cpSync(workerDir, workerDest, { recursive: true });
+}
+
+// Copy MainPage JS files directly (they define global functions)
+const mainPageDir = "./js/MainPage";
+const mainPageDest = "./dist/js/MainPage";
+if (existsSync(mainPageDir)) {
+  cpSync(mainPageDir, mainPageDest, { recursive: true });
+}
 
 // Copy static assets
 const staticDirs = ["css", "fonts", "icon", "textures"];
@@ -72,11 +74,16 @@ if (existsSync(ocSrc)) {
   cpSync(ocSrc, ocDest, { recursive: true });
 }
 
-// Copy Golden Layout CSS
+// Copy Golden Layout CSS and JS
 const glCssSrc = "./node_modules/golden-layout/src/css";
 const glCssDest = "./dist/node_modules/golden-layout/src/css";
 if (existsSync(glCssSrc)) {
   cpSync(glCssSrc, glCssDest, { recursive: true });
+}
+const glJsSrc = "./node_modules/golden-layout/dist";
+const glJsDest = "./dist/node_modules/golden-layout/dist";
+if (existsSync(glJsSrc)) {
+  cpSync(glJsSrc, glJsDest, { recursive: true });
 }
 
 // Copy vendored libraries (rawflate, opentype.js, potpack) - these are custom/vendored
@@ -87,6 +94,14 @@ for (const lib of vendoredLibs) {
   if (existsSync(libSrc)) {
     cpSync(libSrc, libDest, { recursive: true });
   }
+}
+
+// Copy three.js for the worker
+const threeSrc = "./node_modules/three/build/three.min.js";
+const threeDest = "./dist/node_modules/three/build/three.min.js";
+if (existsSync(threeSrc)) {
+  mkdirSync(join(distDir, "node_modules/three/build"), { recursive: true });
+  copyFileSync(threeSrc, threeDest);
 }
 
 console.log("Build complete!");

@@ -1,13 +1,16 @@
 // Import dependencies that will be bundled
 import * as THREE from "three";
-import "three/examples/jsm/controls/DragControls.js";
-import "three/examples/jsm/controls/OrbitControls.js";
-import "three/examples/jsm/controls/TransformControls.js";
+import { DragControls } from "three/examples/jsm/controls/DragControls.js";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { TransformControls } from "three/examples/jsm/controls/TransformControls.js";
 import { STLExporter } from "three/examples/jsm/exporters/STLExporter.js";
 import { OBJExporter } from "three/examples/jsm/exporters/OBJExporter.js";
 
-// Make THREE globally available
+// Make THREE globally available and attach controls to it
 (window as any).THREE = THREE;
+(window as any).THREE.DragControls = DragControls;
+(window as any).THREE.OrbitControls = OrbitControls;
+(window as any).THREE.TransformControls = TransformControls;
 (window as any).STLExporter = STLExporter;
 (window as any).OBJExporter = OBJExporter;
 
@@ -19,13 +22,8 @@ import $ from "jquery";
 (window as any).$ = $;
 (window as any).jQuery = $;
 
-import GoldenLayout from "golden-layout";
-(window as any).GoldenLayout = GoldenLayout;
+// Note: GoldenLayout is loaded via script tag (UMD library) 
+// Note: rawflate is loaded via script tag in HTML
+// Note: Original application scripts (CascadeViewHandles.js, CascadeView.js, CascadeMain.js) 
+// are loaded via script tags in HTML to preserve their global scope functions
 
-// rawflate is vendored - will be loaded separately
-// These scripts are already loaded in index.html before this bundle
-
-// Import original application scripts
-import "../js/MainPage/CascadeViewHandles.js";
-import "../js/MainPage/CascadeView.js";
-import "../js/MainPage/CascadeMain.js";
