@@ -26,7 +26,7 @@ importScripts(
   '../../node_modules/three/build/three.min.js',
   './CascadeStudioStandardLibrary.js',
   './CascadeStudioShapeToMesh.js',
-  '../../node_modules/opencascade.js/dist/opencascade.wasm.js',
+  '../../vendor/opencascade.js/dist/opencascade.wasm.js',
   '../../node_modules/opentype.js/dist/opentype.min.js',
   '../../node_modules/potpack/index.js');
 
@@ -47,7 +47,7 @@ var messageHandlers = {};
 new opencascade({
   locateFile(path) {
     if (path.endsWith('.wasm')) {
-      return "../../node_modules/opencascade.js/dist/opencascade.wasm.wasm";
+      return "../../vendor/opencascade.js/dist/opencascade.wasm.wasm";
     }
     return path;
   }
