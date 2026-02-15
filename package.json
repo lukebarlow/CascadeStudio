@@ -2,11 +2,11 @@
 	"name": "cascadestudio",
 	"productName": "CascadeStudio",
 	"description": "BRep SCAD in your browser.",
-	"homepage": "https://zalo.github.io/CascadeStudio",
+	"homepage": "https://lukebarlow.github.io/CascadeStudio",
 	"type": "module",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/zalo/CascadeStudio.git"
+		"url": "git+https://github.com/lukebarlow/CascadeStudio.git"
 	},
 	"author": {
 		"name": "Johnathon Selstad"
