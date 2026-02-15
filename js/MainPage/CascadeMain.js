@@ -34,7 +34,7 @@ Translate([-25, 0, 40], Text3D("Hi!", 36, 0.15, 'Consolas'));
 // Don't forget to push imported or oc-defined shapes into sceneShapes to add them to the workspace!`;
 
 function initialize(projectContent = null) {
-    const searchParams = new URLSearchParams(window.location.search || window.location.hash.substr(1))
+    const searchParams = new URLSearchParams(window.location.search || window.location.hash.slice(1))
 
     // Load the initial Project from - "projectContent", or the URL
     let loadFromURL     = searchParams.has("code")
