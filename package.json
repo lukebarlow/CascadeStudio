@@ -12,6 +12,11 @@
 	},
 	"license": "MIT",
 	"bundleDependencies": false,
+	"scripts": {
+		"build": "bun run build.ts",
+		"dev": "bun run --watch build.ts & bun --bun serve dist --port 3000",
+		"serve": "bun --bun serve dist --port 3000"
+	},
 	"dependencies": {
 		"tweakpane": "^3.0.5",
 		"golden-layout": "^1.5.9",
