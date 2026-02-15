@@ -21,9 +21,13 @@ console.error = function (err, url, line, colno, errorObj) {
   realConsoleError.apply(console, arguments);
 }; // This is actually accessed via worker.onerror in the main thread
 
-// Import the set of scripts we'll need to perform all the CAD operations
+// Import Three.js as ES module
+import * as THREE from '../../node_modules/three/build/three.module.js';
+// Make THREE available globally for legacy code
+self.THREE = THREE;
+
+// Import other dependencies that don't support ESM yet
 importScripts(
-  '../../node_modules/three/build/three.min.js',
   './CascadeStudioStandardLibrary.js',
   './CascadeStudioShapeToMesh.js',
   '../../node_modules/opencascade.js/dist/opencascade.wasm.js',

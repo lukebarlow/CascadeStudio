@@ -2,12 +2,16 @@
 // If you're looking for the internals of the CAD System, they're in /js/CADWorker
 // If you're looking for the 3D Three.js Viewport, they're in /js/MainPage/CascadeView*
 
+// Import Three.js modules (for type checking and compatibility)
+import * as THREE from '../../node_modules/three/build/three.module.js';
+
 var myLayout, monacoEditor, threejsViewport,
     consoleContainer, consoleGolden, codeContainer, gui,
     GUIState, guiSeparatorAdded = false, userGui = false, count = 0, //focused = true,
     messageHandlers = {},
     startup, file = {}, realConsoleLog;
 window.workerWorking = false;
+window.messageHandlers = messageHandlers; // Expose for other modules
 
 let starterCode = 
 `// Welcome to Cascade Studio!   Here are some useful functions:
@@ -158,6 +162,7 @@ function initialize(projectContent = null) {
                 minimap: { enabled: false }//,
                 //model: null
             });
+            window.monacoEditor = monacoEditor; // Expose globally for other modules
 
             // Collapse all Functions in the Editor to suppress library clutter -----------------
             let codeLines = state.code.split(/\r\n|\r|\n/);
@@ -313,6 +318,7 @@ function initialize(projectContent = null) {
             floatingGUIContainer.id = "guiPanel";
             container.getElement().get(0).appendChild(floatingGUIContainer);
             threejsViewport = new CascadeEnvironment(container);
+            window.threejsViewport = threejsViewport; // Expose globally for HTML handlers
         });
     });
 
@@ -646,3 +652,13 @@ function isArrayLike(item) {
         )
     );
 }
+
+// Export functions to window for HTML inline handlers
+window.initialize = initialize;
+window.saveProject = saveProject;
+window.loadProject = loadProject;
+window.loadFiles = loadFiles;
+window.clearExternalFiles = clearExternalFiles;
+
+// Export for ESM imports
+export { initialize, saveProject, loadProject, loadFiles, clearExternalFiles };
