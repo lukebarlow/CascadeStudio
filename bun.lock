@@ -1,0 +1,26 @@
+{
+  "lockfileVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "cascadestudio",
+      "dependencies": {
+        "golden-layout": "^1.5.9",
+        "jquery": "^3.5.1",
+        "monaco-editor": "^0.20.0",
+        "three": "^0.129.0",
+        "tweakpane": "^3.0.5",
+      },
+    },
+  },
+  "packages": {
+    "golden-layout": ["golden-layout@1.5.9", "", { "dependencies": { "jquery": "*" } }, "sha512-iBXDQCXOTgUEQJo96zPbjDoy5bRIk9XW5l+q+pDgLnIyReqaa1aiQctNud4epsskyLt952BG521dew5Z1liSxA=="],
+
+    "jquery": ["jquery@3.7.1", "", {}, "sha512-m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg=="],
+
+    "monaco-editor": ["monaco-editor@0.20.0", "", {}, ""],
+
+    "three": ["three@0.129.0", "", {}, "sha512-wiWio1yVRg2Oj6WEWsTHQo5eSzYpEwSBtPSi3OofNpvFbf26HFfb9kw4FZJNjII4qxzp0b1xLB11+tKkBGB1ZA=="],
+
+    "tweakpane": ["tweakpane@3.1.10", "", {}, "sha512-rqwnl/pUa7+inhI2E9ayGTqqP0EPOOn/wVvSWjZsRbZUItzNShny7pzwL3hVlaN4m9t/aZhsP0aFQ9U5VVR2VQ=="],
+  }
+}
