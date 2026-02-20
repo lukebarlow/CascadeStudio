@@ -40,7 +40,7 @@ var offlineFundamentals = [
   "node_modules/monaco-editor/min/vs/language/typescript/tsWorker.js",
   "node_modules/monaco-editor/min/vs/base/worker/workerMain.js",
   "node_modules/monaco-editor/min/vs/base/browser/ui/codiconLabel/codicon/codicon.ttf",
-  "node_modules/opencascade.js/dist/oc.d.ts",
+  "vendor/opencascade.js/dist/oc.d.ts",
   "js/CascadeStudioStandardLibrary.js",
   "js/openCascadeHelper.js",
   "js/CascadeView.js",
