@@ -13,7 +13,7 @@ var offlineFundamentals = [
   //'service-worker.js',
   "manifest.webmanifest",
   "icon/android-chrome-192x192.png",
-  /*"node_modules/three/build/three.d.ts",
+  /*"node_modules/@types/three/index.d.ts",
   "node_modules/three/build/three.min.js",
   "node_modules/three/examples/js/controls/DragControls.js",
   "node_modules/three/examples/js/controls/OrbitControls.js",

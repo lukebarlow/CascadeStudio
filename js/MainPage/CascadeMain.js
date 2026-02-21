@@ -122,9 +122,9 @@ function initialize(projectContent = null) {
             }).catch(error => console.log(error.message));
 
             // Three.js Typescript definitions...
-            fetch(prefix + "node_modules/three/build/three.d.ts").then((response) => {
+            fetch(prefix + "node_modules/@types/three/index.d.ts").then((response) => {
                 response.text().then(function (text) {
-                    extraLibs.push({ content: text, filePath: 'file://' + prefix + 'node_modules/three/build/three.d.ts' });
+                    extraLibs.push({ content: text, filePath: 'file://' + prefix + 'node_modules/@types/three/index.d.ts' });
                 });
             }).catch(error => console.log(error.message));
 
