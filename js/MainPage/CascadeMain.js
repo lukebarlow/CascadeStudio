@@ -115,16 +115,16 @@ function initialize(projectContent = null) {
             var extraLibs = [];
             let prefix = window.location.href.startsWith("https://zalo.github.io/") ? "/CascadeStudio/" : "";
             // opencascade.js Typescript Definitions...
-            fetch(prefix + "node_modules/opencascade.js/dist/oc.d.ts").then((response) => {
+            fetch(prefix + "vendor/opencascade.js/dist/oc.d.ts").then((response) => {
                 response.text().then(function (text) {
-                    extraLibs.push({ content: text, filePath: 'file://' + prefix + 'node_modules/opencascade.js/dist/oc.d.ts' });
+                    extraLibs.push({ content: text, filePath: 'file://' + prefix + 'vendor/opencascade.js/dist/oc.d.ts' });
                 });
             }).catch(error => console.log(error.message));
 
             // Three.js Typescript definitions...
-            fetch(prefix + "node_modules/three/build/three.d.ts").then((response) => {
+            fetch(prefix + "node_modules/@types/three/index.d.ts").then((response) => {
                 response.text().then(function (text) {
-                    extraLibs.push({ content: text, filePath: 'file://' + prefix + 'node_modules/three/build/three.d.ts' });
+                    extraLibs.push({ content: text, filePath: 'file://' + prefix + 'node_modules/@types/three/index.d.ts' });
                 });
             }).catch(error => console.log(error.message));
 

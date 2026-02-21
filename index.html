@@ -42,28 +42,17 @@
         <link rel="manifest"           href="./manifest.webmanifest">
         <link rel="apple-touch-icon"   href="./icon/apple-touch-icon.png">
 
-        <script type="text/javascript" src="./node_modules/three/build/three.min.js"></script>
-        <script type="text/javascript" src="./node_modules/three/examples/js/controls/DragControls.js"></script>
-        <script type="text/javascript" src="./node_modules/three/examples/js/controls/OrbitControls.js"></script>
-        <script type="text/javascript" src="./node_modules/three/examples/js/controls/TransformControls.js"></script>
-        <script type="text/javascript" src="./node_modules/three/examples/js/exporters/STLExporter.js"></script>
-        <script type="text/javascript" src="./node_modules/three/examples/js/exporters/OBJExporter.js"></script>
+        <!-- Vendored libraries that are not in npm -->
+        <script type="text/javascript" src="./vendor/rawflate/rawdeflate.js"></script>
+        <script type="text/javascript" src="./vendor/rawflate/rawinflate.js"></script>
 
-        <script type="text/javascript" src="./node_modules/tweakpane/dist/tweakpane.min.js"></script>
-
-        <script type="text/javascript" src="./node_modules/jquery/dist/jquery.min.js"></script>
-        <script type="text/javascript" src="./node_modules/golden-layout/dist/goldenlayout.min.js"></script>
+        <!-- Load GoldenLayout CSS -->
         <link type="text/css" rel="stylesheet" href="./node_modules/golden-layout/src/css/goldenlayout-base.css" />
         <link type="text/css" rel="stylesheet" href="./node_modules/golden-layout/src/css/goldenlayout-dark-theme.css" />
         <link type="text/css" rel="stylesheet" href="./css/main.css" />
-
-        <script type="text/javascript" src="./node_modules/rawflate/rawdeflate.js"></script>
-        <script type="text/javascript" src="./node_modules/rawflate/rawinflate.js"></script>
-        <script type="text/javascript" src="./js/MainPage/CascadeViewHandles.js"></script>
-        <script type="text/javascript" src="./js/MainPage/CascadeView.js"></script>
     </head>
 
-    <body onload="initialize();" style="margin:0px; background-color:rgb(34, 34, 34); "><!--overflow:hidden; position:fixed;-->
+    <body style="margin:0px; background-color:rgb(34, 34, 34); "><!--overflow:hidden; position:fixed;-->
         <h1 hidden></h1> <!-- Puts the Lighthouse Score over 90 heheh-->
         <div id="topnav" class="topnav">
             <a href="https://github.com/zalo/CascadeStudio">Cascade Studio 0.0.7</a>
@@ -83,8 +72,28 @@
             <script type="text/javascript" src="./node_modules/monaco-editor/min/vs/loader.js"></script>
             <script type="text/javascript" src="./node_modules/monaco-editor/min/vs/editor/editor.main.nls.js"></script>
             <script type="text/javascript" src="./node_modules/monaco-editor/min/vs/editor/editor.main.js"></script>
-            <script type="text/javascript" src="./js/MainPage/CascadeMain.js"></script>
         </div>
+        <!-- Load bundled dependencies first -->
+        <script type="text/javascript" src="./js/main.js"></script>
+        <!-- Temporarily disable AMD to load GoldenLayout as a global -->
+        <script>
+            var define_temp = window.define;
+            window.define = undefined;
+        </script>
+        <!-- Load GoldenLayout via script tag (UMD library) -->
+        <script type="text/javascript" src="./node_modules/golden-layout/dist/goldenlayout.min.js"></script>
+        <!-- Restore AMD -->
+        <script>
+            window.define = define_temp;
+        </script>
+        <!-- Then load application scripts that use those dependencies -->
+        <script type="text/javascript" src="./js/MainPage/CascadeViewHandles.js"></script>
+        <script type="text/javascript" src="./js/MainPage/CascadeView.js"></script>
+        <script type="text/javascript" src="./js/MainPage/CascadeMain.js"></script>
+        <script>
+            // Initialize after all scripts are loaded
+            initialize();
+        </script>
 
     </body>
 </html>
