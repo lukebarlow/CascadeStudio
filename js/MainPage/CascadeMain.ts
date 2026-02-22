@@ -1,8 +1,10 @@
+import { GoldenLayout } from 'golden-layout/dist/esm/index.js';
+
 // This script governs the layout and intialization of all of the sub-windows
 // If you're looking for the internals of the CAD System, they're in /js/CADWorker
 // If you're looking for the 3D Three.js Viewport, they're in /js/MainPage/CascadeView*
 
-var myLayout, monacoEditor, threejsViewport,
+var monacoEditor, threejsViewport,
     consoleContainer, consoleGolden, codeContainer, gui,
     GUIState, guiSeparatorAdded = false, userGui = false, count = 0, //focused = true,
     messageHandlers = {},
@@ -30,35 +32,42 @@ Translate([-25, 0, 40], Text3D("Hi!", 36, 0.15, 'Consolas'));
 
 // Don't forget to push imported or oc-defined shapes into sceneShapes to add them to the workspace!`;
 
+let searchParams: any;
+
+let gl: null | GoldenLayout = null;
+
 function initialize(projectContent = null) {
-    this.searchParams = new URLSearchParams(window.location.search || window.location.hash.substr(1))
+    searchParams = new URLSearchParams(window.location.search || window.location.hash.substr(1))
+    
 
     // Load the initial Project from - "projectContent", or the URL
-    let loadFromURL     = this.searchParams.has("code")
+    let loadFromURL     = searchParams.has("code")
     // Set up the Windowing/Docking/Layout System  ---------------------------------------
+
+    let layout: any;
+
+    if(gl != null){
+        gl.destroy();
+        gl = null;
+    }
 
     // Load a project from the Gallery
     if (projectContent) {
-        // Destroy old config, load new one
-        if(myLayout != null){
-            myLayout.destroy();
-            myLayout = null;
-        }
-        myLayout = new GoldenLayout(JSON.parse(projectContent));
+        layout = JSON.parse(projectContent);
 
     // Else load a project from the URL or create a new one from scratch
     } else {
         let codeStr = starterCode;
         GUIState = {};
         if (loadFromURL) {
-            codeStr  = decode(this.searchParams.get("code"));
-            GUIState = JSON.parse(decode(this.searchParams.get("gui")));
+            codeStr  = decode(searchParams.get("code"));
+            GUIState = JSON.parse(decode(searchParams.get("gui")));
         }
 
         // Define the Default Golden Layout
         // Code on the left, Model on the right
         // Console on the bottom right
-        myLayout = new GoldenLayout({
+        layout = {
             content: [{
                 type: 'row',
                 content: [{
@@ -91,13 +100,15 @@ function initialize(projectContent = null) {
                 showMaximiseIcon: false,
                 showCloseIcon: false
             }
-        });
+        };
 
     }
 
+    gl = new GoldenLayout(document.body);
+
     // Set up the Dockable Monaco Code Editor
-    myLayout.registerComponent('codeEditor', function (container, state) {
-        myLayout.on("initialised", () => {
+    gl.registerComponentFactoryFunction('codeEditor', function (container, state) {
+        gl!.on("initialised", () => {
             // Destroy the existing editor if it exists
             if (monacoEditor) {
                 monaco.editor.getModels().forEach(model => model.dispose());
@@ -297,11 +308,12 @@ function initialize(projectContent = null) {
         });
     });
 
+
     // Set up the Dockable Three.js 3D Viewport for viewing the CAD Model
-    myLayout.registerComponent('cascadeView', function (container, state) {
+    gl.registerComponentFactoryFunction('cascadeView', function (container, state) {
         GUIState = state;
         container.setState(GUIState);
-        myLayout.on("initialised", () => {
+        gl!.on("initialised", () => {
             // Destroy the existing editor if it exists
             if (threejsViewport) {
                 threejsViewport.active = false;
@@ -316,8 +328,10 @@ function initialize(projectContent = null) {
         });
     });
 
+
     // Set up the Error and Status Reporting Dockable Console Window
-    myLayout.registerComponent('console', function (container) {
+    gl.registerComponentFactoryFunction('console', function (container) {
+        return;
         consoleGolden = container;
         consoleContainer = document.createElement("div");
         container.getElement().get(0).appendChild(consoleContainer);
@@ -404,16 +418,34 @@ function initialize(projectContent = null) {
     //window.onfocus = () => { focused = true; }
     //document.onblur = window.onblur; document.onfocus = window.onfocus;
 
+    
+
     // Resize the layout when the browser resizes
-    window.onorientationchange = function (event) {
-        myLayout.updateSize(window.innerWidth, window.innerHeight -
-            document.getElementsByClassName('topnav')[0].offsetHeight);
-    };
+    // const resizeLayout = () => {
+    //     const topnav = document.querySelector<HTMLElement>('.topnav');
+    //     const topnavHeight = topnav?.offsetHeight ?? 0;
+
+    //     if (myLayout) {
+    //         myLayout.updateSize(window.innerWidth, window.innerHeight - topnavHeight);
+    //     }
+    // };
+
+    // window.addEventListener('resize', resizeLayout);
+    // window.screen?.orientation?.addEventListener?.('change', resizeLayout);
+
+    
 
     // Initialize the Layout
-    myLayout.init();
-    myLayout.updateSize(window.innerWidth, window.innerHeight -
-        document.getElementById('topnav').offsetHeight);
+    // myLayout.init();
+    gl.loadLayout(layout);
+
+
+
+    // myLayout.updateSize(window.innerWidth, window.innerHeight -
+    //     document.getElementById('topnav').offsetHeight);
+
+
+    
 
     // If the Main Page loads before the CAD Worker, register a 
     // callback to start the model evaluation when the CAD is ready.
@@ -646,3 +678,5 @@ function isArrayLike(item) {
         )
     );
 }
+
+initialize();

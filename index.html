@@ -11,7 +11,7 @@
         <meta name="theme-color"        content="#1e1e1e">
 
         <!-- Include these early and directly so they happen first -->
-        <script>
+        <!-- <script>
             // Install Cascade Studio as a Progressive Web App for Offline Access
             // This needs to be put before ANY HTTP Requests are made, so it can cache them.
             if ('serviceWorker' in navigator) {
@@ -36,7 +36,7 @@
                     }
                 }
             }
-        </script>
+        </script> -->
 
         <link rel='shortcut icon'      href='./icon/favicon.ico' type='image/x-icon' >
         <link rel="manifest"           href="./manifest.webmanifest">
@@ -47,14 +47,13 @@
         <script type="text/javascript" src="./vendor/rawflate/rawinflate.js"></script>
 
         <!-- Load GoldenLayout CSS -->
-        <link type="text/css" rel="stylesheet" href="./node_modules/golden-layout/src/css/goldenlayout-base.css" />
-        <link type="text/css" rel="stylesheet" href="./node_modules/golden-layout/src/css/goldenlayout-dark-theme.css" />
+        <link type="text/css" rel="stylesheet" href="./node_modules/golden-layout/dist/css/goldenlayout-base.css" />
+        <link type="text/css" rel="stylesheet" href="./node_modules/golden-layout/dist/css/themes/goldenlayout-dark-theme.css" />
         <link type="text/css" rel="stylesheet" href="./css/main.css" />
     </head>
 
     <body style="margin:0px; background-color:rgb(34, 34, 34); "><!--overflow:hidden; position:fixed;-->
-        <h1 hidden></h1> <!-- Puts the Lighthouse Score over 90 heheh-->
-        <div id="topnav" class="topnav">
+        <!-- <div id="topnav" class="topnav">
             <a href="https://github.com/zalo/CascadeStudio">Cascade Studio 0.0.7</a>
             <a href="#" title="Save Project to .json" onmouseup="saveProject();">Save Project</a>
             <a href="#" title="Load Project from .json" onmouseup="loadProject();">Load Project</a>
@@ -65,35 +64,35 @@
                 <input id="files" name="files" type="file" accept=".iges,.step,.igs,.stp,.stl" multiple style="display:none;" oninput="loadFiles();"/>
             </label>
             <a href="#" title="Clears the external step/iges/stl files stored in the project." onmouseup="clearExternalFiles();">Clear Imported Files</a>
-        </div>
-        <div id="appbody" style="height:auto">
+        </div> -->
+        <!-- <div id="appbody" style="height:auto">
             <link data-name="vs/editor/editor.main" rel="stylesheet" href="./node_modules/monaco-editor/min/vs/editor/editor.main.css">
             <script>var require = { paths: { 'vs': 'node_modules/monaco-editor/min/vs' } };</script>
             <script type="text/javascript" src="./node_modules/monaco-editor/min/vs/loader.js"></script>
             <script type="text/javascript" src="./node_modules/monaco-editor/min/vs/editor/editor.main.nls.js"></script>
             <script type="text/javascript" src="./node_modules/monaco-editor/min/vs/editor/editor.main.js"></script>
-        </div>
+        </div> -->
         <!-- Load bundled dependencies first -->
         <script type="text/javascript" src="./js/main.js"></script>
         <!-- Temporarily disable AMD to load GoldenLayout as a global -->
-        <script>
+        <!-- <script>
             var define_temp = window.define;
             window.define = undefined;
-        </script>
+        </script> -->
         <!-- Load GoldenLayout via script tag (UMD library) -->
-        <script type="text/javascript" src="./node_modules/golden-layout/dist/goldenlayout.min.js"></script>
+        <!-- <script type="text/javascript" src="./node_modules/golden-layout/dist/goldenlayout.min.js"></script> -->
         <!-- Restore AMD -->
-        <script>
+        <!-- <script>
             window.define = define_temp;
-        </script>
+        </script> -->
         <!-- Then load application scripts that use those dependencies -->
-        <script type="text/javascript" src="./js/MainPage/CascadeViewHandles.js"></script>
-        <script type="text/javascript" src="./js/MainPage/CascadeView.js"></script>
-        <script type="text/javascript" src="./js/MainPage/CascadeMain.js"></script>
-        <script>
+        <!-- <script type="text/javascript" src="./js/MainPage/CascadeViewHandles.js"></script>
+        <script type="text/javascript" src="./js/MainPage/CascadeView.js"></script> -->
+        <script type="module" src="./js/MainPage/CascadeMain.ts"></script>
+        <!-- <script>
             // Initialize after all scripts are loaded
             initialize();
-        </script>
+        </script> -->
 
     </body>
 </html>

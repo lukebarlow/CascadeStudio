@@ -1,11 +1,12 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "cascadestudio",
       "dependencies": {
         "@types/three": "^0.183.1",
-        "golden-layout": "^1.5.9",
+        "golden-layout": "^2.6.0",
         "jquery": "^3.5.1",
         "monaco-editor": "^0.20.0",
         "three": "^0.129.0",
@@ -37,7 +38,7 @@
 
     "fflate": ["fflate@0.8.2", "", {}, "sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A=="],
 
-    "golden-layout": ["golden-layout@1.5.9", "", { "dependencies": { "jquery": "*" } }, "sha512-iBXDQCXOTgUEQJo96zPbjDoy5bRIk9XW5l+q+pDgLnIyReqaa1aiQctNud4epsskyLt952BG521dew5Z1liSxA=="],
+    "golden-layout": ["golden-layout@2.6.0", "", {}, "sha512-sIVQCiRWOymHbVD1Aw/T9/ijbPYAVGBlgGYd1N9MRKfcyBNSpjr87Vg9nSHm+RCT8ELrvK8IJYJV0QRJuVUkCQ=="],
 
     "jquery": ["jquery@3.7.1", "", {}, "sha512-m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg=="],
 
