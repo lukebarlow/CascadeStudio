@@ -1,11 +1,14 @@
 // This script governs the layout and intialization of all of the sub-windows
 // If you're looking for the internals of the CAD System, they're in /js/CADWorker
 // If you're looking for the 3D Three.js Viewport, they're in /js/MainPage/CascadeView*
+import { Pane } from 'tweakpane';
+import { messageHandlers, appState } from './state.js';
+import { CascadeEnvironment } from './CascadeView.js';
+import { getNewFileHandle, writeFile, downloadFile, isArrayLike, decode, encode } from './utils.js';
 
 var myLayout, monacoEditor, threejsViewport,
     consoleContainer, consoleGolden, codeContainer, gui,
     GUIState, guiSeparatorAdded = false, userGui = false, count = 0, //focused = true,
-    messageHandlers = {},
     startup, file = {}, realConsoleLog;
 window.workerWorking = false;
 
@@ -44,7 +47,7 @@ function initialize(projectContent = null) {
             myLayout.destroy();
             myLayout = null;
         }
-        myLayout = new GoldenLayout(JSON.parse(projectContent));
+        myLayout = new window.GoldenLayout(JSON.parse(projectContent));
 
     // Else load a project from the URL or create a new one from scratch
     } else {
@@ -58,7 +61,7 @@ function initialize(projectContent = null) {
         // Define the Default Golden Layout
         // Code on the left, Model on the right
         // Console on the bottom right
-        myLayout = new GoldenLayout({
+        myLayout = new window.GoldenLayout({
             content: [{
                 type: 'row',
                 content: [{
@@ -158,6 +161,7 @@ function initialize(projectContent = null) {
                 minimap: { enabled: false }//,
                 //model: null
             });
+            appState.monacoEditor = monacoEditor;
 
             // Collapse all Functions in the Editor to suppress library clutter -----------------
             let codeLines = state.code.split(/\r\n|\r|\n/);
@@ -208,7 +212,7 @@ function initialize(projectContent = null) {
                     gui.dispose();
                 }
 
-                gui = new Tweakpane.Pane({
+                gui = new Pane({
                     title: 'Cascade Control Panel',
                     container: document.getElementById('guiPanel')
                 });
@@ -235,7 +239,7 @@ function initialize(projectContent = null) {
 
                 // Send the current editor code and GUI state to the Worker thread
                 // This is where the magic happens!
-                cascadeStudioWorker.postMessage({
+                appState.cascadeStudioWorker.postMessage({
                     "type": "Evaluate",
                     payload: {
                         "code": newCode,
@@ -245,7 +249,7 @@ function initialize(projectContent = null) {
 
                 // After evaluating, assemble all of the objects in the "workspace" 
                 // and begin saving them out
-                cascadeStudioWorker.postMessage({
+                appState.cascadeStudioWorker.postMessage({
                     "type": "combineAndRenderShapes",
                 // TODO: GUIState[] may be referenced upon transfer and not copied (checkboxes are false after reload although the default is true
                     payload: { maxDeviation: GUIState["MeshRes"], sceneOptions: { groundPlaneVisible: GUIState["GroundPlane?"], gridVisible: GUIState["Grid?"] } }
@@ -313,6 +317,7 @@ function initialize(projectContent = null) {
             floatingGUIContainer.id = "guiPanel";
             container.getElement().get(0).appendChild(floatingGUIContainer);
             threejsViewport = new CascadeEnvironment(container);
+            appState.threejsViewport = threejsViewport;
         });
     });
 
@@ -422,7 +427,7 @@ function initialize(projectContent = null) {
             // Reimport any previously imported STEP/IGES Files
             let curState = consoleGolden.getState();
             if (curState && Object.keys(curState).length > 0) {
-                cascadeStudioWorker.postMessage({
+                appState.cascadeStudioWorker.postMessage({
                     "type": "loadPrexistingExternalFiles",
                     payload: consoleGolden.getState()
                 });
@@ -520,33 +525,6 @@ function delayReloadEditor() {
     setTimeout(() => { monacoEditor.evaluateCode(); }, 0);
 }
 
-async function getNewFileHandle(desc, mime, ext, open = false) {
-    const options = {
-      types: [
-        {
-          description: desc,
-          accept: {
-            [mime]: ['.' + ext],
-          },
-        },
-      ],
-    };
-    if (open) {
-        return await window.showOpenFilePicker(options);
-    } else {
-        return await window.showSaveFilePicker(options);
-    }
-}
-
-async function writeFile(fileHandle, contents) {
-    // Create a FileSystemWritableFileStream to write to.
-    const writable = await fileHandle.createWritable();
-    // Write the contents of the file to the stream.
-    await writable.write(contents);
-    // Close the file and write the contents to disk.
-    await writable.close();
-}
-
 /** This function serializes the Project's current state 
  * into a `.json` file and saves it to the selected location. */
 async function saveProject() {
@@ -566,18 +544,6 @@ async function saveProject() {
         console.log("Saved project to " + file.handle.name);
         file.content = currentCode;
     });
-}
-
-async function downloadFile(data, name, mime, ext) {
-    const blob = new Blob([data], { type: mime });
-    const a = document.createElement("a");
-    a.download = name + "." + ext;
-    a.style.display = "none";
-    a.href = window.URL.createObjectURL(blob);
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(a.href);
 }
 
 /** This loads a .json file as the currentProject.*/
@@ -602,11 +568,11 @@ const loadProject = async () => {
 
 /** This function triggers the CAD WebWorker to 
  * load one or more  .stl, .step, or .iges files. */
-function loadFiles(fileElementID = "files") {
+function loadFiles(fileElementID = "nav-import-files") {
     // Ask the worker thread to load these files... 
     // I can already feel this not working...
     let files = document.getElementById(fileElementID).files;
-    cascadeStudioWorker.postMessage({
+    appState.cascadeStudioWorker.postMessage({
         "type": "loadFiles",
         "payload": files
     });
@@ -622,27 +588,11 @@ function loadFiles(fileElementID = "files") {
 /** This function clears all Externally Loaded files 
  * from the `externalFiles` dict. */
 function clearExternalFiles() {
-    cascadeStudioWorker.postMessage({
+    appState.cascadeStudioWorker.postMessage({
         "type": "clearExternalFiles"
     });
     consoleGolden.setState({});
 }
 
-/** This decodes a base64 and zipped string to the original version of that string */
-function decode(string) { return RawDeflate.inflate(window.atob(decodeURIComponent(string))); }
-/** This function encodes a string to a base64 and zipped version of that string */
-function encode(string) { return encodeURIComponent(window.btoa(RawDeflate.deflate(string))); }
+export { initialize, saveProject, loadProject, loadFiles, clearExternalFiles };
 
-/** This function returns true if item is indexable like an array. */
-function isArrayLike(item) {
-    return (
-        Array.isArray(item) || 
-        (!!item &&
-          typeof item === "object" &&
-          item.hasOwnProperty("length") && 
-          typeof item.length === "number" && 
-          item.length > 0 && 
-          (item.length - 1) in item
-        )
-    );
-}

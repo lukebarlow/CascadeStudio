@@ -1,5 +1,12 @@
 // This file governs the 3D Viewport which displays the 3D Model
 // It is also in charge of saving to STL and OBJ
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
+import { OBJExporter } from 'three/examples/jsm/exporters/OBJExporter.js';
+import { messageHandlers, appState } from './state.js';
+import { getNewFileHandle, writeFile, downloadFile } from './utils.js';
+import { initializeHandleGizmos } from './CascadeViewHandles.js';
 
 /** Create the base class for a 3D Viewport.
  *  This includes the floor, the grid, the fog, the camera, and lights */
@@ -52,7 +59,7 @@ var Environment = function (goldenContainer) {
     //this.scene.add(new THREE.CameraHelper(this.light2.shadow.camera));
 
     // Set up the orbit controls used for Cascade Studio
-    this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.target.set(0, 45, 0);
     this.controls.panSpeed  = 2;
     this.controls.zoomSpeed = 1;
@@ -263,7 +270,7 @@ var CascadeEnvironment = function (goldenContainer) {
   /** Save the current shape to .stl */
   this.saveShapeSTEP = () => {
     // Ask the worker thread for a STEP file of the current space
-    cascadeStudioWorker.postMessage({"type": "saveShapeSTEP"});
+    appState.cascadeStudioWorker.postMessage({"type": "saveShapeSTEP"});
 
     // Receive the STEP file content from the Worker Thread
     messageHandlers["saveShapeSTEP"] = async (stepContent) => {
@@ -280,7 +287,7 @@ var CascadeEnvironment = function (goldenContainer) {
 
   /**  Save the current shape to an ASCII .stl */
   this.saveShapeSTL = async () => {
-    this.stlExporter = new THREE.STLExporter();
+    this.stlExporter = new STLExporter();
     let result = this.stlExporter.parse(this.mainObject);
     if (window.showSaveFilePicker) {
       const fileHandle = await getNewFileHandle("STL files", "text/plain", "stl");
@@ -294,7 +301,7 @@ var CascadeEnvironment = function (goldenContainer) {
 
   /**  Save the current shape to .obj */
   this.saveShapeOBJ = async () => {
-    this.objExporter = new THREE.OBJExporter();
+    this.objExporter = new OBJExporter();
     let result = this.objExporter.parse(this.mainObject);
     if (window.showSaveFilePicker) {
       const fileHandle = await getNewFileHandle("OBJ files", "text/plain", "obj");
@@ -378,3 +385,5 @@ var CascadeEnvironment = function (goldenContainer) {
   // Initialize the view in-case we're lazy rendering...
   this.environment.renderer.render(this.environment.scene, this.environment.camera);
 }
+
+export { CascadeEnvironment };

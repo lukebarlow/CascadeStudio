@@ -13,7 +13,7 @@ mkdirSync(distDir, { recursive: true });
 
 console.log("Building CascadeStudio with Bun...");
 
-// Bundle the main application JavaScript
+// Bundle the main application JavaScript (includes all MainPage modules)
 await Bun.build({
   entrypoints: ["./src/main.ts"],
   outdir: "./dist/js",
@@ -32,11 +32,11 @@ if (existsSync(workerDir)) {
   cpSync(workerDir, workerDest, { recursive: true });
 }
 
-// Copy MainPage JS files directly (they define global functions)
-const mainPageDir = "./js/MainPage";
-const mainPageDest = "./dist/js/MainPage";
-if (existsSync(mainPageDir)) {
-  cpSync(mainPageDir, mainPageDest, { recursive: true });
+// Copy StandardLibraryIntellisense for Monaco editor intellisense (fetched at runtime)
+const intellisenseSrc = "./js/StandardLibraryIntellisense.ts";
+const intellisenseDest = "./dist/js/StandardLibraryIntellisense.ts";
+if (existsSync(intellisenseSrc)) {
+  copyFileSync(intellisenseSrc, intellisenseDest);
 }
 
 // Copy static assets
