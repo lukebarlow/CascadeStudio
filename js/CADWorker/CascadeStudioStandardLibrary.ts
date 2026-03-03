@@ -16,17 +16,12 @@ declare var THREE: any;
 declare function importScripts(...urls: string[]): void;
 declare var sceneShapes: any[];
 declare var GUIState: Record<string, any>;
-declare var fonts: Record<string, any>;
+declare var fontCache: Record<string, any>;
 declare function CacheOp(args: IArguments, cacheMiss: () => any): any;
 declare function ComputeHash(args: IArguments, raw?: boolean): any;
 declare function stringToHash(s: string): number;
 declare function convertToPnt(pnt: any): any;
 declare function Remove(arr: any[], item: any): any[];
-declare function ForEachEdge(shape: any, callback: (index: number, edge: any) => void): Record<string, number>;
-declare function ForEachFace(shape: any, callback: (index: number, face: any) => void): void;
-declare function ForEachWire(shape: any, callback: (index: number, wire: any) => void): void;
-declare function ForEachVertex(shape: any, callback: (vertex: any) => void): void;
-declare function GetWire(face: any): any;
 declare var argCache: Record<string, any>;
 
 /** Import Misc. Utilities that aren't part of the Exposed Library */
@@ -142,9 +137,9 @@ function Text3D(text: string, size?: number, height?: number, fontName?: string)
 
   let textArgs = JSON.stringify(arguments);
   let curText = CacheOp(arguments, () => {
-    if (fonts[fontName] === undefined) { argCache = {}; console.log("Font not loaded or found yet!  Try again..."); return; }
+    if (fontCache[fontName] === undefined) { argCache = {}; console.log("Font not loaded or found yet!  Try again..."); return; }
     let textFaces: any[] = [];
-    let commands = fonts[fontName].getPath(text, 0, 0, size).commands;
+    let commands = fontCache[fontName].getPath(text, 0, 0, size).commands;
     for (let idx = 0; idx < commands.length; idx++) {
       if (commands[idx].type === "M") {
         // Start a new Glyph
@@ -823,7 +818,6 @@ function Sketch(startingPoint: number[]) {
     this.argsString += ComputeHash(arguments, true);
     // This adds another wire (or edge??) to the currently constructing shape...
     this.wireBuilder.Add(wire);
-    if (endPoint) { this.lastPoint = endPoint; } // Yike what to do here...?
     return this;
   }
 

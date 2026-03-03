@@ -3,7 +3,7 @@ declare var sceneShapes: any[];
 declare var externalShapes: Record<string, any>;
 declare var currentShape: any;
 declare var GUIState: Record<string, any>;
-declare var messageHandlers: Record<string, Function>;
+declare var messageHandlers: Record<string, (payload: any) => any>;
 declare function stringToHash(s: string): number;
 declare function ShapeToMesh(shape: any, maxDeviation: number, fullShapeEdgeHashes: Record<string, number>, fullShapeFaceHashes: Record<string, number>): any;
 

@@ -1,6 +1,6 @@
 declare var THREE: any;
 declare var monacoEditor: any;
-declare var messageHandlers: Record<string, Function>;
+declare var messageHandlers: Record<string, (payload: any) => any>;
 
 // This file handles Transformation Gizmos
 

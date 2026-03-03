@@ -2,7 +2,6 @@ declare var GoldenLayout: any;
 declare var monaco: any;
 declare var Tweakpane: any;
 declare var cascadeStudioWorker: Worker;
-declare var CascadeEnvironment: any;
 declare var RawDeflate: { deflate: (s: string) => string; inflate: (s: string) => string };
 
 // This script governs the layout and intialization of all of the sub-windows

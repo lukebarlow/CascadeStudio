@@ -1,6 +1,6 @@
 declare var THREE: any;
 declare var cascadeStudioWorker: Worker;
-declare var messageHandlers: Record<string, Function>;
+declare var messageHandlers: Record<string, (payload: any) => any>;
 declare function initializeHandleGizmos(viewport: any): void;
 declare function getNewFileHandle(desc: string, mime: string, ext: string): Promise<any>;
 declare function writeFile(handle: any, contents: string): Promise<void>;
@@ -159,8 +159,9 @@ class CascadeEnvironment {
                           });
 
     // A callback to load the Triangulated Shape from the Worker and add it to the Scene
-    messageHandlers["combineAndRenderShapes"] = ([[facelist, edgelist]: any[], sceneOptions: any]) => {
-      window.workerWorking = false;     // Untick this flag to allow Evaluations again
+    messageHandlers["combineAndRenderShapes"] = (payload: any) => {
+      const [[facelist, edgelist], sceneOptions] = payload;
+      (window as any).workerWorking = false;     // Untick this flag to allow Evaluations again
       if (!facelist) { return;}  // Do nothing if the results are null
 
       // The old mainObject is dead!  Long live the mainObject!

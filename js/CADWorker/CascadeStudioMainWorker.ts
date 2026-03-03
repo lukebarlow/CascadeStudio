@@ -1,6 +1,6 @@
 // Declare globals from other scripts
 declare var oc: any;
-declare var opencascade: (config: { locateFile: (path: string) => string }) => Promise<any>;
+declare var opencascade: any;
 declare var opentype: { load: (url: string, callback: (err: any, font: any) => void) => void };
 declare function importScripts(...urls: string[]): void;
 declare function ShapeToMesh(shape: any, maxDeviation: number, edgeHashes: Record<string, number>, faceHashes: Record<string, number>): any;
@@ -47,12 +47,12 @@ importScripts(
 // Preload the Various Fonts that are available via Text3D
 var preloadedFonts = ['../../fonts/Roboto.ttf',
   '../../fonts/Papyrus.ttf', '../../fonts/Consolas.ttf'];
-var fonts: Record<string, any> = {};
+var fontCache: Record<string, any> = {};
 preloadedFonts.forEach((fontURL) => {
   opentype.load(fontURL, function (err: any, font: any) {
     if (err) { console.log(err); }
     let fontName = fontURL.split("./fonts/")[1].split(".ttf")[0];
-    fonts[fontName] = font;
+    fontCache[fontName] = font;
   });
 });
 
