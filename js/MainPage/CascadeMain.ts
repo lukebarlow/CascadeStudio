@@ -1,4 +1,4 @@
-import { GoldenLayout } from 'golden-layout/dist/esm/index.js';
+import { GoldenLayout } from 'golden-layout';
 
 // This script governs the layout and intialization of all of the sub-windows
 // If you're looking for the internals of the CAD System, they're in /js/CADWorker
