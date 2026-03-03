@@ -1,8 +1,17 @@
+declare var oc: any;
+declare var sceneShapes: any[];
+declare var externalShapes: Record<string, any>;
+declare var currentShape: any;
+declare var GUIState: Record<string, any>;
+declare var messageHandlers: Record<string, Function>;
+declare function stringToHash(s: string): number;
+declare function ShapeToMesh(shape: any, maxDeviation: number, fullShapeEdgeHashes: Record<string, number>, fullShapeFaceHashes: Record<string, number>): any;
+
 // File Import and Export Utilities
 
 /** This function synchronously loads the "files" in the 
  * current project into the `externalFiles` dictionary upon startup.*/
-function loadPrexistingExternalFiles(externalFileDict) {
+function loadPrexistingExternalFiles(externalFileDict: Record<string, {content: string}>): void {
   console.log("Loading Pre-Existing external files...");
   for (let key in externalFileDict) {
     if (key.includes(".stl")) {
@@ -15,7 +24,7 @@ function loadPrexistingExternalFiles(externalFileDict) {
 messageHandlers["loadPrexistingExternalFiles"] = loadPrexistingExternalFiles;
 
 /** This function synchronously reads the text contents of a file. */
-const loadFileSync = async (file) => {
+const loadFileSync = async (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     resolve(new FileReaderSync().readAsText(file));
   });
@@ -23,8 +32,8 @@ const loadFileSync = async (file) => {
 
 /** This function synchronously loads a list of files into the 
  * `externalShapes` dictionary and renders them to the viewport. */
-function loadFiles(files) {
-  let extFiles = {};
+function loadFiles(files: FileList): void {
+  let extFiles: Record<string, {content: string}> = {};
   sceneShapes = [];
   for (let i = 0; i < files.length; i++) {
     var lastImportedShape = null;
@@ -57,7 +66,7 @@ messageHandlers["loadFiles"] = loadFiles;
 
 /** This function parses the ASCII contents of a `.STEP` or `.IGES` 
  * File as a Shape into the `externalShapes` dictionary. */
-function importSTEPorIGES(fileName, fileText) {
+function importSTEPorIGES(fileName: string, fileText: string): any {
   // Writes the uploaded file to Emscripten's Virtual Filesystem
   oc.FS.createDataFile("/", fileName, fileText, true, true);
 
@@ -92,7 +101,7 @@ function importSTEPorIGES(fileName, fileText) {
 
 /** This function parses the contents of an ASCII .STL File as a Shape 
  * into the `externalShapes` dictionary. */
-function importSTL(fileName, fileText) {
+function importSTL(fileName: string, fileText: string): any {
   // Writes the uploaded file to Emscripten's Virtual Filesystem
   oc.FS.createDataFile("/", fileName, fileText, true, true);
 
@@ -125,7 +134,7 @@ function importSTL(fileName, fileText) {
 
 /** This function returns `currentShape` `.STEP` file content.  
  * `currentShape` is set upon the successful completion of `combineAndRenderShapes()`.  */
-function saveShapeSTEP (filename = "CascadeStudioPart.step") {
+function saveShapeSTEP(filename: string = "CascadeStudioPart.step"): string | undefined {
   let writer = new oc.STEPControl_Writer();
   // Convert to a .STEP File
   let transferResult = writer.Transfer(currentShape, 0);

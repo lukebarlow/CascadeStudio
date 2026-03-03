@@ -1,9 +1,13 @@
+declare var THREE: any;
+declare var monacoEditor: any;
+declare var messageHandlers: Record<string, Function>;
+
 // This file handles Transformation Gizmos
 
 /** Adds Handle Gizmo Functionality to the Cascade View */
-function initializeHandleGizmos(threejsViewport){
+function initializeHandleGizmos(threejsViewport: any): void {
   /** Create a Transformation Gizmo in the Scene View */
-  messageHandlers["createTransformHandle"] = function (payload) {
+  messageHandlers["createTransformHandle"] = function (payload: any) {
     if (payload.lineAndColumn[0] <= 0) {
       console.error("Transform Gizmo not supported in this browser!  Use Chrome or Firefox!"); return null;
     }
@@ -15,7 +19,7 @@ function initializeHandleGizmos(threejsViewport){
     handle.setMode(this.gizmoMode);
     handle.setSpace(this.gizmoSpace);
     handle.lineAndColumn = payload.lineAndColumn;
-    handle.onChanged = (event) => {
+    handle.onChanged = (event: any) => {
       this.environment.controls.enabled = !event.value;
       this.environment.viewDirty = true;
 
@@ -28,7 +32,7 @@ function initializeHandleGizmos(threejsViewport){
           handle.placeHolder.position.x.toFixed() + ", " +
           -handle.placeHolder.position.z.toFixed() + ", " +
           handle.placeHolder.position.y.toFixed() + "]";
-        let axisAngle = [[0, 0, 0], 0];
+        let axisAngle: any = [[0, 0, 0], 0];
         let q = handle.placeHolder.quaternion;
         if ((1 - (q.w * q.w)) > 0.001) {
           axisAngle = [[
@@ -56,7 +60,7 @@ function initializeHandleGizmos(threejsViewport){
           }
 
           let newCode = "";
-          code.forEach((codeLine) => { newCode += codeLine + "\n"; });
+          code.forEach((codeLine: string) => { newCode += codeLine + "\n"; });
           monacoEditor.setValue(newCode.slice(0, -1));
           monacoEditor.evaluateCode(false);
         }
@@ -81,7 +85,7 @@ function initializeHandleGizmos(threejsViewport){
 
   /** Clear the Transformation Gizmos in the Scene. */
   threejsViewport.clearTransformHandles = function () {
-    this.handles.forEach((handle) => {
+    this.handles.forEach((handle: any) => {
       handle.removeEventListener('dragging-changed', handle.onChanged);
       this.environment.scene.remove(handle.placeHolder);
       this.environment.scene.remove(handle);
@@ -90,30 +94,30 @@ function initializeHandleGizmos(threejsViewport){
   }.bind(threejsViewport);
 
   /** Change the Mode that the Transformation Gizmos are in. */
-  window.addEventListener('keydown', function (event) {
+  window.addEventListener('keydown', function (event: KeyboardEvent) {
     switch (event.keyCode) {
       // These match Unity's Hotkeys but I'm open to changing them
       case 88: // X
         this.gizmoSpace = (this.gizmoSpace === "local") ? "world" : "local";
-        this.handles.forEach((handle) => { handle.setSpace(this.gizmoSpace); });
+        this.handles.forEach((handle: any) => { handle.setSpace(this.gizmoSpace); });
         break;
       case 87: // W
         this.gizmoMode = "translate";
-        this.handles.forEach((handle) => {
+        this.handles.forEach((handle: any) => {
           //handle.showX = true; handle.showY = true; handle.showZ = true;
           handle.setMode(this.gizmoMode);
         });
         break;
       case 69: // E
         this.gizmoMode = "rotate";
-        this.handles.forEach((handle) => {
+        this.handles.forEach((handle: any) => {
           //handle.showX = true; handle.showY = true; handle.showZ = true;
           handle.setMode(this.gizmoMode);
         });
         break;
       case 82: // R
         this.gizmoMode = "scale";
-        this.handles.forEach((handle) => {
+        this.handles.forEach((handle: any) => {
           //handle.showX = false; handle.showY = false; handle.showZ = false;
           handle.setMode(this.gizmoMode);
         });

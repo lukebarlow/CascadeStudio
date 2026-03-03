@@ -1,13 +1,20 @@
+declare var GoldenLayout: any;
+declare var monaco: any;
+declare var Tweakpane: any;
+declare var cascadeStudioWorker: Worker;
+declare var CascadeEnvironment: any;
+declare var RawDeflate: { deflate: (s: string) => string; inflate: (s: string) => string };
+
 // This script governs the layout and intialization of all of the sub-windows
 // If you're looking for the internals of the CAD System, they're in /js/CADWorker
 // If you're looking for the 3D Three.js Viewport, they're in /js/MainPage/CascadeView*
 
-var myLayout, monacoEditor, threejsViewport,
-    consoleContainer, consoleGolden, codeContainer, gui,
-    GUIState, guiSeparatorAdded = false, userGui = false, count = 0, //focused = true,
-    messageHandlers = {},
-    startup, file = {}, realConsoleLog;
-window.workerWorking = false;
+var myLayout: any, monacoEditor: any, threejsViewport: any,
+    consoleContainer: HTMLDivElement | null, consoleGolden: any, codeContainer: any, gui: any,
+    GUIState: Record<string, any>, guiSeparatorAdded: boolean = false, userGui: boolean = false, count: number = 0, //focused = true,
+    messageHandlers: Record<string, (payload: any) => any> = {},
+    startup: (() => void) | null, file: { handle?: any; content?: string } = {}, realConsoleLog: (typeof console.log) | null;
+(window as any).workerWorking = false;
 
 let starterCode = 
 `// Welcome to Cascade Studio!   Here are some useful functions:
@@ -30,11 +37,11 @@ Translate([-25, 0, 40], Text3D("Hi!", 36, 0.15, 'Consolas'));
 
 // Don't forget to push imported or oc-defined shapes into sceneShapes to add them to the workspace!`;
 
-function initialize(projectContent = null) {
-    this.searchParams = new URLSearchParams(window.location.search || window.location.hash.substr(1))
+function initialize(projectContent: string | null = null): void {
+    (this as any).searchParams = new URLSearchParams(window.location.search || window.location.hash.substr(1))
 
     // Load the initial Project from - "projectContent", or the URL
-    let loadFromURL     = this.searchParams.has("code")
+    let loadFromURL     = (this as any).searchParams.has("code")
     // Set up the Windowing/Docking/Layout System  ---------------------------------------
 
     // Load a project from the Gallery
@@ -51,8 +58,8 @@ function initialize(projectContent = null) {
         let codeStr = starterCode;
         GUIState = {};
         if (loadFromURL) {
-            codeStr  = decode(this.searchParams.get("code"));
-            GUIState = JSON.parse(decode(this.searchParams.get("gui")));
+            codeStr  = decode((this as any).searchParams.get("code"));
+            GUIState = JSON.parse(decode((this as any).searchParams.get("gui")));
         }
 
         // Define the Default Golden Layout
@@ -96,11 +103,11 @@ function initialize(projectContent = null) {
     }
 
     // Set up the Dockable Monaco Code Editor
-    myLayout.registerComponent('codeEditor', function (container, state) {
+    myLayout.registerComponent('codeEditor', function (container: any, state: any) {
         myLayout.on("initialised", () => {
             // Destroy the existing editor if it exists
             if (monacoEditor) {
-                monaco.editor.getModels().forEach(model => model.dispose());
+                monaco.editor.getModels().forEach((model: any) => model.dispose());
                 monacoEditor = null;
             }
 
@@ -112,7 +119,7 @@ function initialize(projectContent = null) {
             monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
 
             // Import Typescript Intellisense Definitions for the relevant libraries...
-            var extraLibs = [];
+            var extraLibs: any[] = [];
             let prefix = window.location.href.startsWith("https://zalo.github.io/") ? "/CascadeStudio/" : "";
             // opencascade.js Typescript Definitions...
             fetch(prefix + "vendor/opencascade.js/dist/oc.d.ts").then((response) => {
@@ -161,7 +168,7 @@ function initialize(projectContent = null) {
 
             // Collapse all Functions in the Editor to suppress library clutter -----------------
             let codeLines = state.code.split(/\r\n|\r|\n/);
-            let collapsed = []; let curCollapse = null;
+            let collapsed: any[] = []; let curCollapse: any = null;
             for (let li = 0; li < codeLines.length; li++) {
                 if (codeLines[li].startsWith("function")) {
                     curCollapse = { "startLineNumber": (li + 1) };
@@ -186,13 +193,13 @@ function initialize(projectContent = null) {
             
             /** This function triggers the evaluation of the editor code 
              *  inside the CAD Worker thread.*/
-            monacoEditor.evaluateCode = (saveToURL = false) => {
+            monacoEditor.evaluateCode = (saveToURL: boolean = false) => {
                 // Don't evaluate if the `window.workerWorking` flag is true
-                if (window.workerWorking) { return; }
+                if ((window as any).workerWorking) { return; }
 
                 // Set the "window.workerWorking" flag, so we don't submit 
                 // multiple jobs to the worker thread simultaneously
-                window.workerWorking = true;
+                (window as any).workerWorking = true;
 
                 // Refresh these every so often to ensure we're always getting intellisense
                 monaco.languages.typescript.typescriptDefaults.setExtraLibs(extraLibs);
@@ -226,7 +233,7 @@ function initialize(projectContent = null) {
                 // Set up receiving files from the worker thread
                 // This lets users download arbitrary information 
                 // from the CAD engine via the `saveFile()` function
-                messageHandlers["saveFile"] = (payload) => {
+                messageHandlers["saveFile"] = (payload: any) => {
                     let link = document.createElement("a");
                     link.href = payload.fileURL;
                     link.download = payload.filename;
@@ -267,7 +274,7 @@ function initialize(projectContent = null) {
                 console.log("Generating Model");
             };
 
-            document.onkeydown = function (e) {
+            document.onkeydown = function (e: KeyboardEvent) {
                 // Force the F5 Key to refresh the model instead of refreshing the page
                 if ((e.which || e.keyCode) == 116) {
                     e.preventDefault();
@@ -283,7 +290,7 @@ function initialize(projectContent = null) {
                 return true;
             };
 
-            document.onkeyup = function (e) {
+            document.onkeyup = function (e: KeyboardEvent) {
                 if (!file.handle || e.which === 0) {
                     return true;
                 }
@@ -298,7 +305,7 @@ function initialize(projectContent = null) {
     });
 
     // Set up the Dockable Three.js 3D Viewport for viewing the CAD Model
-    myLayout.registerComponent('cascadeView', function (container, state) {
+    myLayout.registerComponent('cascadeView', function (container: any, state: any) {
         GUIState = state;
         container.setState(GUIState);
         myLayout.on("initialised", () => {
@@ -317,7 +324,7 @@ function initialize(projectContent = null) {
     });
 
     // Set up the Error and Status Reporting Dockable Console Window
-    myLayout.registerComponent('console', function (container) {
+    myLayout.registerComponent('console', function (container: any) {
         consoleGolden = container;
         consoleContainer = document.createElement("div");
         container.getElement().get(0).appendChild(consoleContainer);
@@ -327,7 +334,7 @@ function initialize(projectContent = null) {
         // This should allow objects with circular references to print to the text console
         let getCircularReplacer = () => {
             let seen = new WeakSet();
-            return (key, value) => {
+            return (key: string, value: any) => {
                 if (typeof value === "object" && value !== null) {
                     if (seen.has(value)) { return; }
                     seen.add(value);
@@ -340,7 +347,7 @@ function initialize(projectContent = null) {
         if (!realConsoleLog) {
             let alternatingColor = true;
             realConsoleLog = console.log;
-            console.log = function (message) {
+            console.log = function (message: any) {
                 let newline = document.createElement("div");
                 newline.style.fontFamily = "monospace";
                 newline.style.color = (alternatingColor = !alternatingColor) ? "LightGray" : "white";
@@ -354,14 +361,14 @@ function initialize(projectContent = null) {
                 }
                 consoleContainer.appendChild(newline);
                 consoleContainer.parentElement.scrollTop = consoleContainer.parentElement.scrollHeight;
-                realConsoleLog.apply(console, arguments);
+                realConsoleLog.apply(console, arguments as any);
             };
             // Call this console.log when triggered from the WASM
-            messageHandlers["log"  ] = (payload) => { console.log(payload); };
-            messageHandlers["error"] = (payload) => { window.workerWorking = false; console.error(payload); };
+            messageHandlers["log"  ] = (payload: any) => { console.log(payload); };
+            messageHandlers["error"] = (payload: any) => { (window as any).workerWorking = false; console.error(payload); };
 
             // Print Errors in Red
-            window.onerror = function (err, url, line, colno, errorObj) {
+            window.onerror = function (err: any, url?: string, line?: number, colno?: number, errorObj?: Error) {
                 let newline = document.createElement("div");
                 newline.style.color = "red";
                 newline.style.fontFamily = "monospace";
@@ -386,9 +393,9 @@ function initialize(projectContent = null) {
             };
 
             // If we've received a progress update from the Worker Thread, append it to our previous message
-            messageHandlers["Progress"] = (payload) => {
+            messageHandlers["Progress"] = (payload: any) => {
                 // Add a dot to the progress indicator for each progress message we find in the queue
-                consoleContainer.parentElement.lastElementChild.lastElementChild.innerText =
+                consoleContainer.parentElement.lastElementChild.lastElementChild.innerHTML =
                     "> Generating Model" + ".".repeat(payload.opNumber) + ((payload.opType)? " ("+payload.opType+")" : "");
             };
 
@@ -405,9 +412,9 @@ function initialize(projectContent = null) {
     //document.onblur = window.onblur; document.onfocus = window.onfocus;
 
     // Resize the layout when the browser resizes
-    window.onorientationchange = function (event) {
+    window.onorientationchange = function (event: Event) {
         myLayout.updateSize(window.innerWidth, window.innerHeight -
-            document.getElementsByClassName('topnav')[0].offsetHeight);
+            (document.getElementsByClassName('topnav')[0] as HTMLElement).offsetHeight);
     };
 
     // Initialize the Layout
@@ -438,15 +445,15 @@ function initialize(projectContent = null) {
 
     // Register callbacks from the CAD Worker to add Sliders, Buttons, and Checkboxes to the UI
     // TODO: Enqueue these so the sliders are added/removed at the same time to eliminate flashing
-    messageHandlers["addSlider"] = (payload) => {
+    messageHandlers["addSlider"] = (payload: any) => {
         if (!(payload.name in GUIState)) { GUIState[payload.name] = payload.default; }
-        const params = {
+        const params: any = {
             min: payload.min,
             max: payload.max,
             step: payload.step,
         };
         if (payload.dp) {
-            params.format = v => v.toFixed(payload.dp);
+            params.format = (v: number) => v.toFixed(payload.dp);
         }
 
         addGuiSeparator();
@@ -457,19 +464,19 @@ function initialize(projectContent = null) {
         );
 
         if (payload.realTime) {
-            slider.on('change', e => {
+            slider.on('change', (e: any) => {
                 if (e.last) {
                     delayReloadEditor();
                 }
             });
         }
     }
-    messageHandlers["addButton"] = (payload) => {
+    messageHandlers["addButton"] = (payload: any) => {
         addGuiSeparator();
         gui.addButton({ title: payload.name, label: payload.label }).on('click', payload.callback);
     }
 
-    messageHandlers["addCheckbox"] = (payload) => {
+    messageHandlers["addCheckbox"] = (payload: any) => {
         if (!(payload.name in GUIState)) { GUIState[payload.name] = payload.default || false; }
         addGuiSeparator();
         gui.addInput(GUIState, payload.name).on('change', () => {
@@ -477,12 +484,12 @@ function initialize(projectContent = null) {
         })
     }
 
-    messageHandlers["addTextbox"] = (payload) => {
+    messageHandlers["addTextbox"] = (payload: any) => {
         if (!(payload.name in GUIState)) { GUIState[payload.name] = payload.default || ''; }
         addGuiSeparator();
         const input = gui.addInput(GUIState, payload.name)
         if (payload.realTime) {
-            input.on('change', e => {
+            input.on('change', (e: any) => {
                 if (e.last) {
                     delayReloadEditor();
                 }
@@ -490,14 +497,14 @@ function initialize(projectContent = null) {
         }
     }
 
-    messageHandlers['addDropdown'] = (payload) => {
+    messageHandlers['addDropdown'] = (payload: any) => {
         if (!(payload.name in GUIState)) { GUIState[payload.name] = payload.default || ''; }
         const options = payload.options || {}
 
         addGuiSeparator();
         const input = gui.addInput(GUIState, payload.name, { options })
         if (payload.realTime) {
-            input.on('change', e => {
+            input.on('change', (e: any) => {
                 if (e.last) {
                     delayReloadEditor();
                 }
@@ -505,10 +512,10 @@ function initialize(projectContent = null) {
         }
     }
 
-    messageHandlers["resetWorking"] = () => { window.workerWorking = false; }
+    messageHandlers["resetWorking"] = () => { (window as any).workerWorking = false; }
 }
 
-function addGuiSeparator() {
+function addGuiSeparator(): void {
     if (userGui && !guiSeparatorAdded) {
         guiSeparatorAdded = true;
         gui.addSeparator();
@@ -516,11 +523,11 @@ function addGuiSeparator() {
 }
 
 /* Workaround for Tweakpane errors when tearing down gui during change event callbacks */
-function delayReloadEditor() {
+function delayReloadEditor(): void {
     setTimeout(() => { monacoEditor.evaluateCode(); }, 0);
 }
 
-async function getNewFileHandle(desc, mime, ext, open = false) {
+async function getNewFileHandle(desc: string, mime: string, ext: string, open: boolean = false): Promise<any> {
     const options = {
       types: [
         {
@@ -532,13 +539,13 @@ async function getNewFileHandle(desc, mime, ext, open = false) {
       ],
     };
     if (open) {
-        return await window.showOpenFilePicker(options);
+        return await (window as any).showOpenFilePicker(options);
     } else {
-        return await window.showSaveFilePicker(options);
+        return await (window as any).showSaveFilePicker(options);
     }
 }
 
-async function writeFile(fileHandle, contents) {
+async function writeFile(fileHandle: any, contents: string): Promise<void> {
     // Create a FileSystemWritableFileStream to write to.
     const writable = await fileHandle.createWritable();
     // Write the contents of the file to the stream.
@@ -549,7 +556,7 @@ async function writeFile(fileHandle, contents) {
 
 /** This function serializes the Project's current state 
  * into a `.json` file and saves it to the selected location. */
-async function saveProject() {
+async function saveProject(): Promise<void> {
     let currentCode = monacoEditor.getValue();
     if (!file.handle) {
         file.handle = await getNewFileHandle(
@@ -568,7 +575,7 @@ async function saveProject() {
     });
 }
 
-async function downloadFile(data, name, mime, ext) {
+async function downloadFile(data: string, name: string, mime: string, ext: string): Promise<void> {
     const blob = new Blob([data], { type: mime });
     const a = document.createElement("a");
     a.download = name + "." + ext;
@@ -581,38 +588,38 @@ async function downloadFile(data, name, mime, ext) {
 }
 
 /** This loads a .json file as the currentProject.*/
-const loadProject = async () => {
+const loadProject = async (): Promise<void> => {
     // Don't allow loading while the worker is working to prevent race conditions.
-    if (window.workerWorking) { return; }
+    if ((window as any).workerWorking) { return; }
 
     // Load Project .json from a file
     [file.handle] = await getNewFileHandle(
         'Cascade Studio project files',
         'application/json',
         'json',
-        open = true
+        true
     );
     let fileSystemFile = await file.handle.getFile();
     let jsonContent = await fileSystemFile.text();
     window.history.replaceState({}, 'Cascade Studio','?');
-    initialize(projectContent=jsonContent);
+    initialize(jsonContent);
     codeContainer.setTitle(file.handle.name);
     file.content = monacoEditor.getValue();
 }
 
 /** This function triggers the CAD WebWorker to 
  * load one or more  .stl, .step, or .iges files. */
-function loadFiles(fileElementID = "files") {
+function loadFiles(fileElementID: string = "files"): void {
     // Ask the worker thread to load these files... 
     // I can already feel this not working...
-    let files = document.getElementById(fileElementID).files;
+    let files = (document.getElementById(fileElementID) as HTMLInputElement).files;
     cascadeStudioWorker.postMessage({
         "type": "loadFiles",
         "payload": files
     });
 
     // Receive a list of the imported files
-    messageHandlers["loadFiles"] = (extFiles) => {
+    messageHandlers["loadFiles"] = (extFiles: any) => {
         console.log("Storing loaded files!");
         //console.log(extFiles);
         consoleGolden.setState(extFiles);
@@ -621,7 +628,7 @@ function loadFiles(fileElementID = "files") {
 
 /** This function clears all Externally Loaded files 
  * from the `externalFiles` dict. */
-function clearExternalFiles() {
+function clearExternalFiles(): void {
     cascadeStudioWorker.postMessage({
         "type": "clearExternalFiles"
     });
@@ -629,12 +636,12 @@ function clearExternalFiles() {
 }
 
 /** This decodes a base64 and zipped string to the original version of that string */
-function decode(string) { return RawDeflate.inflate(window.atob(decodeURIComponent(string))); }
+function decode(string: string): string { return RawDeflate.inflate(window.atob(decodeURIComponent(string))); }
 /** This function encodes a string to a base64 and zipped version of that string */
-function encode(string) { return encodeURIComponent(window.btoa(RawDeflate.deflate(string))); }
+function encode(string: string): string { return encodeURIComponent(window.btoa(RawDeflate.deflate(string))); }
 
 /** This function returns true if item is indexable like an array. */
-function isArrayLike(item) {
+function isArrayLike(item: any): boolean {
     return (
         Array.isArray(item) || 
         (!!item &&

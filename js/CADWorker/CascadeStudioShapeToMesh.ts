@@ -1,4 +1,25 @@
-function LengthOfCurve(geomAdaptor, UMin, UMax, segments = 5) {
+declare var oc: any;
+declare var THREE: any;
+declare function potpack(boxes: any[]): any;
+declare function ForEachFace(shape: any, callback: (index: number, face: any) => void): void;
+declare function ForEachEdge(shape: any, callback: (index: number, edge: any) => void): Record<string, number>;
+declare var argCache: Record<string, any>;
+
+interface FaceData {
+  vertex_coord: number[];
+  uv_coord: number[];
+  normal_coord: number[];
+  tri_indexes: number[];
+  number_of_triangles: number;
+  face_index: number;
+}
+
+interface EdgeData {
+  vertex_coord: number[];
+  edge_index: number;
+}
+
+function LengthOfCurve(geomAdaptor: any, UMin: number, UMax: number, segments: number = 5): number {
   let point1 = new THREE.Vector3(), point2 = new THREE.Vector3(), arcLength = 0, gpPnt = new oc.gp_Pnt();
   for (let s = UMin; s <= UMax; s += (UMax - UMin) / segments){
     geomAdaptor.D0(s, gpPnt);
@@ -13,8 +34,8 @@ function LengthOfCurve(geomAdaptor, UMin, UMax, segments = 5) {
   return arcLength;
 }
 
-function ShapeToMesh(shape, maxDeviation, fullShapeEdgeHashes, fullShapeFaceHashes) {
-    let facelist = [], edgeList = [];
+function ShapeToMesh(shape: any, maxDeviation: number, fullShapeEdgeHashes: Record<string, number>, fullShapeFaceHashes: Record<string, number>): [FaceData[], EdgeData[]] {
+    let facelist: FaceData[] = [], edgeList: EdgeData[] = [];
     try {
       shape = new oc.TopoDS_Shape(shape);
 
@@ -22,16 +43,16 @@ function ShapeToMesh(shape, maxDeviation, fullShapeEdgeHashes, fullShapeFaceHash
       new oc.BRepMesh_IncrementalMesh(shape, maxDeviation, false, maxDeviation * 5);
 
       // Construct the edge hashes to assign proper indices to the edges
-      let fullShapeEdgeHashes2 = {};
+      let fullShapeEdgeHashes2: Record<string, any> = {};
 
       // Iterate through the faces and triangulate each one
-      let triangulations = []; let uv_boxes = []; let curFace = 0;
+      let triangulations: any[] = []; let uv_boxes: any[] = []; let curFace = 0;
       ForEachFace(shape, (faceIndex, myFace) => {
         let aLocation = new oc.TopLoc_Location();
         let myT = oc.BRep_Tool.prototype.Triangulation(myFace, aLocation);
         if (myT.IsNull()) { console.error("Encountered Null Face!"); argCache = {}; return; }
 
-        let this_face = {
+        let this_face: FaceData = {
           vertex_coord: [],
           uv_coord: [],
           normal_coord: [],
@@ -138,7 +159,7 @@ function ShapeToMesh(shape, maxDeviation, fullShapeEdgeHashes, fullShapeFaceHash
         ForEachEdge(myFace, (index, myEdge) => {
           let edgeHash = myEdge.HashCode(100000000);
           if (fullShapeEdgeHashes2.hasOwnProperty(edgeHash)) {
-            let this_edge = {
+            let this_edge: EdgeData = {
               vertex_coord: [],
               edge_index: -1
             };
@@ -196,7 +217,7 @@ function ShapeToMesh(shape, maxDeviation, fullShapeEdgeHashes, fullShapeFaceHash
       ForEachEdge(shape, (index, myEdge) => {
         let edgeHash = myEdge.HashCode(100000000);
         if (!fullShapeEdgeHashes2.hasOwnProperty(edgeHash)) {
-          let this_edge = {
+          let this_edge: EdgeData = {
             vertex_coord: [],
             edge_index: -1
           };
@@ -223,7 +244,7 @@ function ShapeToMesh(shape, maxDeviation, fullShapeEdgeHashes, fullShapeFaceHash
 
     } catch(err) {
       setTimeout(() => {
-        err.message = "INTERNAL OPENCASCADE ERROR DURING GENERATE: " + err.message;
+        (err as Error).message = "INTERNAL OPENCASCADE ERROR DURING GENERATE: " + (err as Error).message;
         throw err; 
       }, 0);
     }

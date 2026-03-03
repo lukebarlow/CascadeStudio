@@ -1,7 +1,26 @@
 #!/usr/bin/env bun
 
-import { copyFileSync, cpSync, existsSync, mkdirSync, rmSync } from "fs";
+import { copyFileSync, cpSync, existsSync, mkdirSync, readdirSync, rmSync } from "fs";
 import { join } from "path";
+
+// Helper to transpile a .ts file to .js in the dest directory
+async function transpileDir(srcDir: string, destDir: string) {
+  const transpiler = new Bun.Transpiler({ loader: "ts" });
+  if (!existsSync(srcDir)) return;
+  mkdirSync(destDir, { recursive: true });
+  const files = readdirSync(srcDir);
+  for (const file of files) {
+    const srcPath = join(srcDir, file);
+    if (file.endsWith(".ts")) {
+      const tsSource = await Bun.file(srcPath).text();
+      const jsOutput = transpiler.transformSync(tsSource);
+      const destFile = file.replace(/\.ts$/, ".js");
+      await Bun.write(join(destDir, destFile), jsOutput);
+    } else if (!file.endsWith(".js")) {
+      copyFileSync(srcPath, join(destDir, file));
+    }
+  }
+}
 
 const distDir = "./dist";
 
@@ -28,16 +47,12 @@ await Bun.build({
 // Copy worker files directly (they use importScripts and can't be bundled as ES modules)
 const workerDir = "./js/CADWorker";
 const workerDest = "./dist/js/CADWorker";
-if (existsSync(workerDir)) {
-  cpSync(workerDir, workerDest, { recursive: true });
-}
+await transpileDir(workerDir, workerDest);
 
 // Copy MainPage JS files directly (they define global functions)
 const mainPageDir = "./js/MainPage";
 const mainPageDest = "./dist/js/MainPage";
-if (existsSync(mainPageDir)) {
-  cpSync(mainPageDir, mainPageDest, { recursive: true });
-}
+await transpileDir(mainPageDir, mainPageDest);
 
 // Copy static assets
 const staticDirs = ["css", "fonts", "icon", "textures"];
